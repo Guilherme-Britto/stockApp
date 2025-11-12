@@ -32,7 +32,7 @@ export function ProductsPage() {
 
       <ProductList products={products} onOrderSuccess={() => load(page)} />
 
-      <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
+      <div style={{ marginTop: 20, display: "flex", justifyContent: "space-between", alignContent: "center", gap: 10 }}>
         <button onClick={prevPage} disabled={page === 1}>Anterior</button>
         <span>Página {page} de {totalPages}</span>
         <button onClick={nextPage} disabled={page === totalPages}>Próxima</button>
