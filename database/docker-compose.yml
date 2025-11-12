@@ -1,0 +1,11 @@
+
+services:
+
+  stock-database:
+    image: 'postgres:15'
+    environment:
+      - 'POSTGRES_DB=stock_database'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '5432:5432'
