@@ -2,7 +2,7 @@
 
 Before starting, ensure you have the following installed on your machine:
 
--Node.js (v18 or higher)
+-Node.js (v20 or higher)
 -npm (v9 or higher)
 -Docker and Docker Compose
 
