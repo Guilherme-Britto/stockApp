@@ -57,10 +57,9 @@ describe('OrdersService', () => {
         createQueryBuilder: jest.fn().mockReturnValue(mockCreateQueryBuilder)
       });
 
-      // save(product) e save(order)
       mockQueryRunner.manager.save
-        .mockResolvedValueOnce({ ...mockProduct, stock: 8 }) // save(product)
-        .mockResolvedValueOnce({ id: 1, product: mockProduct, quantity: 2 }); // save(order)
+        .mockResolvedValueOnce({ ...mockProduct, stock: 8 })
+        .mockResolvedValueOnce({ id: 1, product: mockProduct, quantity: 2 });
 
       const result = await service.createOrder({ productId: 1, quantity: 2 });
 

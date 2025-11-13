@@ -16,7 +16,7 @@ export class ProductsService {
     const [data, total] = await this.productsRepo.findAndCount({
       skip,
       take: limit,
-      order: { id: 'ASC' }, // opcional
+      order: { id: 'ASC' },
     });
 
     return {

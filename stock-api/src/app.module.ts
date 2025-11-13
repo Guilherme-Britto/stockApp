@@ -10,7 +10,7 @@ import { OrdersModule } from './orders/orders.module';
 @Module({
   imports: [  
     ConfigModule.forRoot({
-      isGlobal: true, // para não precisar importar nos outros módulos
+      isGlobal: true,
     }),    
 
     ProductsModule,
