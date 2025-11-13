@@ -9,6 +9,8 @@ import { Product } from '../entities/product.entity';
 export class OrdersService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  private queue: (() => Promise<void>)[] = [];
+  private processing = false;
   async listOrders(page: number, limit: number) {
     const skip = (page - 1) * limit;
 
@@ -29,10 +31,40 @@ export class OrdersService {
       totalPages: Math.ceil(total / limit),
     };
   }
-
   async createOrder(dto: CreateOrderDto) {
-    const { productId, quantity } = dto;
+    return new Promise((resolve, reject) => {
+      this.queue.push(async () => {
+        try {
+          const result = await this.processOrder(dto);
+          resolve(result);
+        } catch (err) {
+          reject(err);
+        }
+      });
 
+      if (!this.processing) {
+        this.processNext();
+      }
+    });
+  }
+
+  private async processNext() {
+    if (this.queue.length === 0) {
+      this.processing = false;
+      return;
+    }
+
+    this.processing = true;
+    const nextJob = this.queue.shift();
+    if (nextJob) {
+      await nextJob().catch(console.error);
+    }
+
+    this.processNext();
+  }
+
+  private async processOrder(dto: CreateOrderDto) {
+    const { productId, quantity } = dto;
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -40,9 +72,9 @@ export class OrdersService {
     try {
       const product = await queryRunner.manager
         .getRepository(Product)
-        .createQueryBuilder("product")
-        .setLock("pessimistic_write")
-        .where("product.id = :id", { id: productId })
+        .createQueryBuilder('product')
+        .setLock('pessimistic_write')
+        .where('product.id = :id', { id: productId })
         .getOne();
 
       if (!product) throw new NotFoundException('Product not found');
@@ -55,7 +87,6 @@ export class OrdersService {
       await queryRunner.manager.save(product);
 
       const order = queryRunner.manager.create(Order, { product, quantity });
-      
       const savedOrder = await queryRunner.manager.save(order);
 
       await queryRunner.commitTransaction();
@@ -64,7 +95,7 @@ export class OrdersService {
         orderId: savedOrder.id,
         product: product.name,
         quantity: savedOrder.quantity,
-        remainingStock: product.stock
+        remainingStock: product.stock,
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
